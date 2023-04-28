@@ -13,7 +13,7 @@ typedef struct paragens{
 }paragem;
 
 
-void geracodigo(char* p, paragem* PGEM, int tam);
+void geracodigo(char p[], paragem* PGEM, int tam);
 void escrevecomandos();
 paragem* addParagem(paragem* PGEM, int *tam);
 paragem registarParagem(paragem* PGEM, int tam);
@@ -28,8 +28,7 @@ int main() {
     do{
         escrevecomandos();
         printf("\n\t\tcomando:");
-        scanf("%28[^\n]", &cmd);
-        fflush(stdin);
+        scanf(" %28[^\n]", &cmd);
 
         if(strcmp(cmd, "ver paragens") == 0){
             pritparagens(PGEM, tamPGEM);
@@ -71,8 +70,8 @@ paragem* addParagem(paragem* PGEM, int *tam){
 void geracodigo(char p[], paragem* PGEM, int tam){
     int i;
 
-    // Inicializa o gerador de números aleatórios com o tempo atual;
-    srand(time(NULL));
+    // Inicializa o gerador de nÃºmeros aleatÃ³rios com o tempo atual;
+    srand((unsigned int)time(NULL));
     do{
         printf("\nvou criar uum codigo");
         for(i=0; i < tamCodigo ; i++){
@@ -95,13 +94,14 @@ paragem registarParagem(paragem* PGEM, int tam){
     paragem info;
 
     //nome da paragem
-    printf("\nqual e o nome da paragem: ");
-    scanf("%29[^\n]", &info.nome);
-    fflush(stdin);
-
     //gerar codigo da paragem
-    geracodigo(&info.codigo, PGEM, tam);
+    geracodigo(info.codigo, PGEM, tam);
     printf("\no cogido gerado para essa paragem e: %s", info.codigo);
+
+    //nome da paragem
+    printf("\nqual e o nome da paragem: ");
+    scanf(" %29[^\n]", info.nome);
+
 
     info.numLinhas = 0;
     return info;
