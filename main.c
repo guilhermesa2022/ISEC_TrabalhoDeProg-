@@ -43,6 +43,34 @@ int verificaSeExiste(char nome[tamNome], Plinhas p);
 void liberta_lista(Plinhas p);
 void inserirNoInicio(Plinhas p, paragem *Pgem, int num, int pos);
 
+void localizar_paragem(paragem* Pgem, int numparagem, Plinhas p){
+    int i, j;
+    PLinhaParagem aux;
+    char codigo[tamCodigo];
+
+    printf("Escreva o codigo da paragem que ter procurar:");
+    scanf("%s", codigo);
+    printf("\nswswwsw");
+
+    for(i=0; i < numparagem && strcmp(codigo, Pgem[i].codigo) != 0; i++)
+        printf("\tppp");
+
+    while(p != NULL){
+        printf("\n\tentrei");
+            aux = p->InicioParagem;
+            while(aux != NULL){
+                printf("\n\t\tque mundo");
+                printf("\nEssa paragem existe na linha : %s", p->Nome);
+                if(strcmp(aux->codigo, codigo) == 0){
+                    printf("\nEssa paragem existe na linha : %s", p->Nome);
+                    break;
+                }
+                aux = aux->Prox;
+            }
+        p = p->Prolinha;
+    }
+}
+
 int main() {
     char cmd[29];
     paragem *PGEM = NULL;
@@ -79,7 +107,7 @@ int main() {
             if(!strcmp(cmd , "adicionar no a linha")){
 
                 printf("\nClicar 1 Para Inserir No Inicio\tClicar 2 Para Inserir No Meio\tClicar 3 Para Inserir No Final: ");
-                scanf("%d", &escolha);
+                scanf("%i", &escolha);
 
                 if(escolha == 1){
                     inserirNoInicio(listalinhas, PGEM, tamPGEM, 1);
@@ -93,6 +121,9 @@ int main() {
         }else
             if(!strcmp(cmd, "eliminar no a linha")){
 
+        }else
+            if(!strcmp(cmd, "localizar")){
+                localizar_paragem(PGEM, tamPGEM, listalinhas);
         }else
             printf("\n\t\t\t--->comando nao existe\n");
 
@@ -189,29 +220,30 @@ void inserirNoInicio(Plinhas p, paragem *Pgem, int num, int pos){
 
         Pparagem = malloc(sizeof(linhaparagem));
 
-        printf("escreva o codigo da paragem que quer inserir : ");
+        printf("\nEscreva o codigo da paragem que quer inserir : ");
         scanf(" %29[^\n]", Pparagem->codigo);
 
         for (i = 0; i < num && strcmp(Pparagem->codigo, Pgem[i].codigo) != 0 ; ++i)
             ;
         if(i == num){
-            printf("\ncodigo da paragem nao existe por favor voltar a tentar");
+            printf("\nCodigo da paragem nao existe por favor voltar a tentar");
             free(Pparagem);
             return ;
         }
 
         strcpy(Pparagem->nome, Pgem[i].nome);
-        printf("resoldado do strcpy == %s", Pparagem->nome);
         Pparagem->ant = NULL;
         Pparagem->Prox = NULL;
 
 
         if(p->InicioParagem == NULL){
             p->numDePagagens++;
+            (Pgem[i].numLinhas)++;
             p->InicioParagem = Pparagem;
             printf("\nainda nao existe paragens");
         }else if(pos == 1){
             p->numDePagagens++;
+            (Pgem[i].numLinhas)++;
             Pparagem->Prox = p->InicioParagem;
             p->InicioParagem->ant = Pparagem;
             p->InicioParagem = Pparagem;
@@ -227,6 +259,7 @@ void inserirNoInicio(Plinhas p, paragem *Pgem, int num, int pos){
             Pparagem->ant = aux;
             aux->Prox = Pparagem;
             p->numDePagagens++;
+            (Pgem[i].numLinhas)++;
         }
         return ;
     }else{
@@ -400,6 +433,7 @@ void escrevecomandos(){
     printf("\n\t comando: \"ver linhas\"                - para ver todas as linhas");
     printf("\n\t comando: \"adicionar no a linha\"      - para ver todas as linhas");
     printf("\n\t comando: \"eliminar no a linha\"       - para ver todas as linhas");
+    printf("\n\t comando: \"localizar\"                 - para ver todas as linhas");
     printf("\n\t comando: \"sair\"                      - para terminar.");
     putchar('\n');
 }
