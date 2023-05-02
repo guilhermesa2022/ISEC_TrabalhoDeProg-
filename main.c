@@ -42,33 +42,53 @@ void preenche(Plinhas Novo, Plinhas p);
 int verificaSeExiste(char nome[tamNome], Plinhas p);
 void liberta_lista(Plinhas p);
 void inserirNoInicio(Plinhas p, paragem *Pgem, int num, int pos);
+void localizar_paragem(paragem* Pgem, int numparagem, Plinhas p);
 
-void localizar_paragem(paragem* Pgem, int numparagem, Plinhas p){
-    int i, j;
-    PLinhaParagem aux;
-    char codigo[tamCodigo];
+void eliminarNoDaLinha(Plinhas p){
 
-    printf("Escreva o codigo da paragem que ter procurar:");
-    scanf("%s", codigo);
-    printf("\nswswwsw");
-
-    for(i=0; i < numparagem && strcmp(codigo, Pgem[i].codigo) != 0; i++)
-        printf("\tppp");
-
-    while(p != NULL){
-        printf("\n\tentrei");
-            aux = p->InicioParagem;
-            while(aux != NULL){
-                printf("\n\t\tque mundo");
-                printf("\nEssa paragem existe na linha : %s", p->Nome);
-                if(strcmp(aux->codigo, codigo) == 0){
-                    printf("\nEssa paragem existe na linha : %s", p->Nome);
-                    break;
-                }
-                aux = aux->Prox;
-            }
-        p = p->Prolinha;
+    if(p == NULL){
+        printf("\nnao ha linha");
+        return ;
     }
+
+    char nomeDaLinha[tamNome], codigo[tamCodigo + 1];
+    printf("\nescreva a linha que voce perdende eliminar a paragem: ");
+    scanf(" %29[^\n]", nomeDaLinha);
+
+    while (p != NULL && strcmp(p->Nome, nomeDaLinha) != 0)
+        p = p->Prolinha;
+
+    if(p == NULL){
+        printf("\n o nome que voce inserou nao existe");
+        return ;
+    }
+
+    PLinhaParagem aux;
+    aux = p->InicioParagem;
+    printf("\nescreva o codigo da paragem que voce perdende eliminar da linha: ");
+    scanf(" %s", codigo);
+
+    while (aux != NULL && strcmp(aux->codigo, codigo) != 0)
+        aux = aux->Prox;
+
+    if(aux == NULL){
+        printf("nao existe essa paragem nessa linha");
+        return ;
+    }
+
+    if(aux == p->InicioParagem)
+    {
+        p->numDePagagens--;
+        p->InicioParagem = aux->Prox;
+        if(p->InicioParagem != NULL)
+            p->InicioParagem->ant = NULL;
+    }else{
+        p->numDePagagens--;
+        aux->ant->Prox = aux->Prox;
+        if(aux->Prox != NULL)
+            aux->Prox->ant = aux->ant;
+    }
+    free(aux);
 }
 
 int main() {
@@ -120,7 +140,7 @@ int main() {
                 }
         }else
             if(!strcmp(cmd, "eliminar no a linha")){
-
+                eliminarNoDaLinha(listalinhas);
         }else
             if(!strcmp(cmd, "localizar")){
                 localizar_paragem(PGEM, tamPGEM, listalinhas);
@@ -264,6 +284,35 @@ void inserirNoInicio(Plinhas p, paragem *Pgem, int num, int pos){
         return ;
     }else{
         printf("\n\t\t--->nao ha paragem ou linha registado no programa para fazer essa operacao");
+    }
+}
+
+void localizar_paragem(paragem* Pgem, int numparagem, Plinhas p){
+    int i, j;
+    PLinhaParagem aux;
+    char codigo[tamCodigo + 1];
+
+    printf("Escreva o codigo da paragem que ter procurar:");
+    scanf("%s", codigo);
+
+    for(i=0; i < numparagem && strcmp(codigo, Pgem[i].codigo) != 0; i++)
+        ;
+
+    if(i == numparagem){
+        printf("essa paragens nao existe");
+        return ;
+    }
+
+    while(p != NULL){
+        aux = p->InicioParagem;
+        while(aux != NULL){
+            if(strcmp(aux->codigo, codigo) == 0){
+                printf("\nEssa paragem existe na linha : %s", p->Nome);
+                break;
+            }
+            aux = aux->Prox;
+        }
+        p = p->Prolinha;
     }
 }
 
