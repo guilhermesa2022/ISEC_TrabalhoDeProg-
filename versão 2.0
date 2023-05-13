@@ -45,53 +45,14 @@ int verificaSeExiste(char nome[tamNome], Plinhas p);
 void liberta_lista(Plinhas p);
 void inserirNoInicio(Plinhas p, paragem *Pgem, int num, int pos);
 void localizar_paragem(paragem* Pgem, int numparagem, Plinhas p);
+void eliminarNoDaLinha(Plinhas p, paragem *Pgem, int num);
+void guardaDados(paragem *b, int total, Plinhas  p);
+int recuperaDadosDeParagens(paragem** Pgem, int *total, Plinhas* p);
+Plinhas insere_linha_final(Plinhas p, Plinhas novo);
+PLinhaParagem insere_paragemnNaLinha_final(PLinhaParagem p, PLinhaParagem novo);
 
-void eliminarNoDaLinha(Plinhas p){
 
-    if(p == NULL){
-        printf("\nnao ha linha");
-        return ;
-    }
 
-    char nomeDaLinha[tamNome], codigo[tamCodigo + 1];
-    printf("\nescreva a linha que voce perdende eliminar a paragem: ");
-    scanf(" %29[^\n]", nomeDaLinha);
-
-    while (p != NULL && strcmp(p->Nome, nomeDaLinha) != 0)
-        p = p->Prolinha;
-
-    if(p == NULL){
-        printf("\n o nome que voce inserou nao existe");
-        return ;
-    }
-
-    PLinhaParagem aux;
-    aux = p->InicioParagem;
-    printf("\nescreva o codigo da paragem que voce perdende eliminar da linha: ");
-    scanf(" %s", codigo);
-
-    while (aux != NULL && strcmp(aux->codigo, codigo) != 0)
-        aux = aux->Prox;
-
-    if(aux == NULL){
-        printf("nao existe essa paragem nessa linha");
-        return ;
-    }
-
-    if(aux == p->InicioParagem)
-    {
-        p->numDePagagens--;
-        p->InicioParagem = aux->Prox;
-        if(p->InicioParagem != NULL)
-            p->InicioParagem->ant = NULL;
-    }else{
-        p->numDePagagens--;
-        aux->ant->Prox = aux->Prox;
-        if(aux->Prox != NULL)
-            aux->Prox->ant = aux->ant;
-    }
-    free(aux);
-}
 
 int main() {
     char cmd[29];
@@ -99,6 +60,11 @@ int main() {
     int tamPGEM = 0;
     Plinhas listalinhas = NULL;
     int escolha = 0;
+
+    //por os dados do ficheiros para memoria
+    if (recuperaDadosDeParagens(&PGEM ,&tamPGEM, &listalinhas) == 1){
+        printf("nao foi possivel returnar os dados do sistema");
+    }
 
     do{
         escrevecomandos();
@@ -142,7 +108,7 @@ int main() {
                 }
         }else
             if(!strcmp(cmd, "eliminar no a linha")){
-                eliminarNoDaLinha(listalinhas);
+                eliminarNoDaLinha(listalinhas, PGEM, tamPGEM);
         }else
             if(!strcmp(cmd, "localizar")){
                 localizar_paragem(PGEM, tamPGEM, listalinhas);
@@ -152,10 +118,127 @@ int main() {
 
     } while (strcmp(cmd, "sair") != 0);
 
+    guardaDados(PGEM, tamPGEM, listalinhas);
+
     if(PGEM != NULL)
         free(PGEM);
     liberta_lista(listalinhas);
     return 0;
+}
+
+int recuperaDadosDeParagens(paragem** Pgem, int *total, Plinhas* p){
+    FILE *f;
+    paragem* b = NULL;
+    Plinhas novo, TEMP = NULL;
+    linhas linhaAUX;
+    int numParagensNaLinha = 0;
+    PLinhaParagem novoPagagem, auxParagem;
+    linhaparagem paragemAUX;
+
+    f = fopen("dadosDePragemELinhas.dat", "rb");
+    if (f == NULL){
+        printf("Erro no acesso ao ficheiro\n");
+        return 1;
+    }
+
+    fread(total, sizeof(int), 1, f);
+    b = malloc(sizeof(paragem) * (*total));
+    if(b == NULL){
+        fclose(f);
+        *total = 0;
+        return 1;
+    }
+
+    fread(b, sizeof(paragem), *total, f);
+
+    *Pgem = b;
+
+    printf("\nos dados das paragens foi restaurado sem problemas");
+
+    while(fread(&linhaAUX, sizeof(linhas), 1, f) == 1){
+        novo = malloc(sizeof (linhas));
+        if(novo == NULL){   fclose(f);  return 1;}
+        *novo = linhaAUX;
+        novo->Prolinha = NULL;
+        novo->InicioParagem = NULL;
+        TEMP =insere_linha_final(TEMP, novo);
+        numParagensNaLinha = novo->numDePagagens;
+
+        for (int i = 0; i < numParagensNaLinha; i++) {
+            fread(&paragemAUX, sizeof(linhaparagem), 1, f);
+            novoPagagem = malloc(sizeof(linhaparagem));
+            if(novoPagagem == NULL){   fclose(f);  return 1;}
+            *novoPagagem = paragemAUX;
+            novoPagagem->Prox = NULL;
+            novoPagagem->ant = NULL;
+            novo->InicioParagem = insere_paragemnNaLinha_final(novo->InicioParagem, novoPagagem);
+        }
+
+    }
+    printf("\ndeu tudo certo na restaurado dos dados");
+    *p = TEMP;
+
+    fclose(f);
+
+    return 0;
+
+}
+
+PLinhaParagem insere_paragemnNaLinha_final(PLinhaParagem p, PLinhaParagem novo){
+    Plinhas aux;
+    if(p == NULL)
+        p = novo;
+    else
+    {
+        aux = p;
+        while(aux->Prolinha != NULL)
+            aux = aux->Prolinha;
+        aux->Prolinha = novo;
+        novo->ant = aux;
+    }
+    return p;
+}
+
+Plinhas insere_linha_final(Plinhas p, Plinhas novo){
+    Plinhas aux;
+    if(p == NULL)
+        p = novo;
+    else
+    {
+        aux = p;
+        while(aux->Prolinha != NULL)
+            aux = aux->Prolinha;
+        aux->Prolinha = novo;
+    }
+    return p;
+}
+
+void guardaDados(paragem *b, int total, Plinhas  p){
+    FILE *f;
+
+    f = fopen("dadosDePragemELinhas.dat", "wb");
+    if(f==NULL)
+    {
+        printf("Erro no acesso ao ficheiro\n");
+        return ;
+    }
+
+    fwrite(&total, sizeof(int), 1, f);
+    fwrite(b, sizeof(paragem), total, f);
+
+    PLinhaParagem aux;
+
+    while (p != NULL){
+        fwrite(p, sizeof(linhas), 1, f);
+        aux = p->InicioParagem;
+        while (aux != NULL){
+            fwrite(aux, sizeof(linhaparagem), 1, f);
+            aux = aux->Prox;
+        }
+        p = p->Prolinha;
+    }
+
+    fclose(f);
 }
 
 Plinhas addlinha(Plinhas p){
@@ -179,6 +262,61 @@ void preenche(Plinhas Novo, Plinhas p){
     Novo->numDePagagens = 0;
     Novo->InicioParagem = NULL;
     Novo->Prolinha = NULL;
+}
+
+void eliminarNoDaLinha(Plinhas p, paragem *Pgem, int num){
+
+    if(p == NULL){
+        printf("\nnao ha linha");
+        return ;
+    }
+
+    int i;
+    char nomeDaLinha[tamNome], codigo[tamCodigo + 1];
+    printf("\nescreva a linha que voce perdende eliminar a paragem: ");
+    scanf(" %29[^\n]", nomeDaLinha);
+
+    while (p != NULL && strcmp(p->Nome, nomeDaLinha) != 0)
+        p = p->Prolinha;
+
+    if(p == NULL){
+        printf("\n o nome que voce inserou nao existe");
+        return ;
+    }
+
+    PLinhaParagem aux;
+    aux = p->InicioParagem;
+    printf("\nescreva o codigo da paragem que voce perdende eliminar da linha: ");
+    scanf(" %s", codigo);
+
+    while (aux != NULL && strcmp(aux->codigo, codigo) != 0)
+        aux = aux->Prox;
+
+    if(aux == NULL){
+        printf("nao existe essa paragem nessa linha");
+        return ;
+    }
+
+    // encontrae a onde esta a paregem no array dinamoco para diminor o numero de linhas que a paragem esta;;
+    for (i = 0; i < num && strcmp(codigo, Pgem[i].codigo) != 0 ; ++i)
+        ;
+
+
+    if(aux == p->InicioParagem)
+    {
+        p->numDePagagens--;
+        Pgem[i].numLinhas--;
+        p->InicioParagem = aux->Prox;
+        if(p->InicioParagem != NULL)
+            p->InicioParagem->ant = NULL;
+    }else{
+        p->numDePagagens--;
+        Pgem[i].numLinhas--;
+        aux->ant->Prox = aux->Prox;
+        if(aux->Prox != NULL)
+            aux->Prox->ant = aux->ant;
+    }
+    free(aux);
 }
 
 int verificaSeExiste(char nome[30], Plinhas p){
@@ -416,6 +554,10 @@ Plinhas eliminalinha(Plinhas p){
     printf("que linha quer eliminar: ");
     scanf(" %29[^\n]", nome);
     if(strcmp(nome, aux->Nome) ==0){
+        if (aux->InicioParagem != NULL){
+            printf("\nEsta linha nao pode ser eliminada porque tem paragens");
+            return p;
+        }
         printf("\nentrei no primero if");
         aux = aux->Prolinha;
         free(p);
@@ -423,6 +565,10 @@ Plinhas eliminalinha(Plinhas p){
     }else{
         while (aux != NULL && strcmp(nome, aux->Prolinha->Nome) !=0){
             aux = aux->Prolinha;
+        }
+        if(aux->Prolinha->InicioParagem != NULL){
+            printf("\nEsta linha nao pode ser eliminada porque tem paragens");
+            return p;
         }
         TEMP = aux->Prolinha;
         aux->Prolinha = aux->Prolinha->Prolinha;
