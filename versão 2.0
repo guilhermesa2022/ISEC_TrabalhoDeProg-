@@ -94,7 +94,9 @@ int main() {
         }else
             if(!strcmp(cmd , "adicionar no a linha")){
 
-                printf("\nClicar 1 Para Inserir No Inicio\tClicar 2 Para Inserir No Meio\tClicar 3 Para Inserir No Final: ");
+                printf("\n\tClicar 1 Para Inserir No Inicio;");
+                printf("\n\tClicar 2 Para Inserir No Meio   - a linha tem que ter pelo menos 2 paragens;");
+                printf("\n\tClicar 3 Para Inserir No Final; \n ===>");
                 scanf("%d", &escolha);
 
                 if(escolha == 1){
@@ -131,8 +133,8 @@ int recuperaDadosDeParagens(paragem** Pgem, int *total, Plinhas* p){
     paragem* b = NULL;
     Plinhas novo, TEMP = NULL;
     linhas linhaAUX;
-    int numParagensNaLinha = 0;
-    PLinhaParagem novoPagagem, auxParagem;
+    int numParagensNaLinha;
+    PLinhaParagem novoPagagem;
     linhaparagem paragemAUX;
 
     f = fopen("dadosDePragemELinhas.dat", "rb");
@@ -190,7 +192,7 @@ PLinhaParagem insere_paragemnNaLinha_final(PLinhaParagem p, PLinhaParagem novo){
         p = novo;
     else
     {
-        aux = p;
+        aux =  p;
         while(aux->Prolinha != NULL)
             aux = aux->Prolinha;
         aux->Prolinha = novo;
@@ -273,7 +275,7 @@ void eliminarNoDaLinha(Plinhas p, paragem *Pgem, int num){
 
     int i;
     char nomeDaLinha[tamNome], codigo[tamCodigo + 1];
-    printf("\nescreva a linha que voce perdende eliminar a paragem: ");
+    printf("\nescreva o nome da linha, que a paragem que vocÃª quer eliminar pertence: ");
     scanf(" %29[^\n]", nomeDaLinha);
 
     while (p != NULL && strcmp(p->Nome, nomeDaLinha) != 0)
@@ -320,16 +322,13 @@ void eliminarNoDaLinha(Plinhas p, paragem *Pgem, int num){
 }
 
 int verificaSeExiste(char nome[30], Plinhas p){
-    printf("--------------------%s", nome);
     while (p != NULL){
-        printf("\nvericocar 1");
         if(!strcmp(p->Nome, nome)){
-            printf("\no nome da linha ja existe por favor;");
+            printf("\no nome da linha ja existe por favor tente novamente como outro nome");
             return 1;
         }
         p = p->Prolinha;
     }
-    printf("\nvericicar sair");
     return 0;
 }
 
@@ -400,14 +399,12 @@ void inserirNoInicio(Plinhas p, paragem *Pgem, int num, int pos){
             p->numDePagagens++;
             (Pgem[i].numLinhas)++;
             p->InicioParagem = Pparagem;
-            printf("\nainda nao existe paragens");
         }else if(pos == 1){
             p->numDePagagens++;
             (Pgem[i].numLinhas)++;
             Pparagem->Prox = p->InicioParagem;
             p->InicioParagem->ant = Pparagem;
             p->InicioParagem = Pparagem;
-            printf("\nainda ja existe paragens");
         }else{
             aux = p->InicioParagem;
             for (j = 1; aux->Prox!=NULL && j<pos-1; j++)
@@ -519,7 +516,7 @@ paragem* eliminaParagem(paragem* PGEM, int* tam){
         return PGEM;
     }else
         if(PGEM[i].numLinhas != 0){
-        printf("\nParagem esta acusiada a alguma linha");
+        printf("\nParagem esta associada a alguma linha");
         return PGEM;
         }else
             if(*tam == 1){
@@ -614,7 +611,6 @@ void ListarLinhas(Plinhas p){
         aux = p->InicioParagem;
         while (aux != NULL){
             printf("\n\t-->nome: %s //codigo: %s ", aux->nome, aux->codigo);
-            printf("\n\t-->ant: %p //depois: %p // numparagem = %i ", aux->ant, aux->Prox, p->numDePagagens); //teste;;
             aux = aux->Prox;
         }
         p = p->Prolinha;
