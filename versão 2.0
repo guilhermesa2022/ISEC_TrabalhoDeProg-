@@ -50,7 +50,100 @@ void guardaDados(paragem *b, int total, Plinhas  p);
 int recuperaDadosDeParagens(paragem** Pgem, int *total, Plinhas* p);
 Plinhas insere_linha_final(Plinhas p, Plinhas novo);
 PLinhaParagem insere_paragemnNaLinha_final(PLinhaParagem p, PLinhaParagem novo);
+Plinhas inserir_linha(Plinhas L, paragem* p,  int NumParagens);
 
+
+Plinhas inserir_linha(Plinhas L, paragem* p,  int NumParagens){
+    FILE *f;
+    char nomeDoFicheiro[40];
+    char nomelinha[tamNome];
+    Plinhas aux = L;
+    // pedir o nome do ficheiro e abrir se der certo contunioar se nao returnar para a main;
+    printf("\nNome do ficheiro do que tem o dados da linha:");
+    scanf(" %39[^\n]", nomeDoFicheiro);
+    f = fopen(nomeDoFicheiro, "r");
+
+    if(f == NULL){
+        printf("\nErro no acesso ao ficheiro");
+        return L;
+    }
+
+    // Pegar a primeira linha da ficheiro de txt que deve ser a nome da linha
+    if(fgets(nomelinha, sizeof(nomelinha), f) == NULL){
+        printf("\nErro na leitura do nome da linha");
+        fclose(f);
+        return L;
+    }
+
+    while (aux->Prolinha != NULL && strcmp(nomelinha, aux->Nome) != 0)
+        aux = aux->Prolinha;
+
+    if(aux->Prolinha != NULL){
+        printf("\na linha \" %s \" ja existe!", aux->Nome);
+        fclose(f);
+        return L;
+    }
+
+    // criar uma espaço de memória para a nova linha se der errado fechar o arquivo e retornar para a main
+
+    Plinhas novaLinha = NULL;
+    if((novaLinha = malloc(sizeof(linhas))) == NULL){
+        printf("\nErro na alocacao de memoria");
+        fclose(f);
+        return L;
+    }else{
+        strcpy(novaLinha->Nome, nomelinha);
+        novaLinha->InicioParagem = NULL;
+        novaLinha->Prolinha = NULL;
+        novaLinha->numDePagagens = 0;
+    }
+    printf("\n\t\t\tteste ---=== %s", novaLinha->Nome);
+
+    /*ler as paragens lê o nome e o código até o que não for lido nao for 3 argumentos e
+     * fazer um molloc para criar espaço para por as informações da paragem na linha */
+    char nomeDaParagem[tamNome];
+    char codigoParagem[tamCodigo+1];
+    char espaco;
+    PLinhaParagem Novaparagem = NULL;
+    int i;
+
+    while (fscanf(f, " %29[^#] %c %s",nomeDaParagem ,&espaco ,codigoParagem) == 3){
+        nomeDaParagem[strlen(nomeDaParagem)-1] = '\0';
+        if((Novaparagem = malloc(sizeof (linhaparagem))) == NULL){
+            printf("\nErro na malloc para a paragem");
+            free(novaLinha);
+            fclose(f);
+            return L;
+
+        }else{
+            for (i = 0; i < NumParagens && strcmp(codigoParagem, p[i].codigo) != 0 ; ++i)
+                ;
+
+            if(i == NumParagens){
+                printf("\n\tEssa paragem \\\"%s\\\" nao existe  por isso nao vai ser implementadaa",codigoParagem);
+            }else{
+                if (strcmp(p[i].nome, nomeDaParagem) != 0) {
+                    printf("\n\tO nome da paragem como o codigo %s nao condiz "
+                           "\n\tPor essa motivo vai ser modificado de %s para %s", codigoParagem, nomeDaParagem,
+                           p[i].nome);
+                    strcpy(nomeDaParagem, p[i].nome);
+                }
+                printf("\nvou priencer e por no final da lista de paragem");
+                Novaparagem->Prox = NULL;
+                Novaparagem->ant = NULL;
+                strcpy(Novaparagem->codigo, codigoParagem);
+                strcpy(Novaparagem->nome, nomeDaParagem);
+                novaLinha->InicioParagem = insere_paragemnNaLinha_final(novaLinha->InicioParagem, Novaparagem);
+                p[i].numLinhas++;
+            }
+        }
+    }
+
+    novaLinha->Prolinha = L;
+    L = novaLinha;
+    fclose(f);
+    return L;
+}
 
 
 
@@ -66,10 +159,11 @@ int main() {
         printf("nao foi possivel returnar os dados do sistema");
     }
 
+
     do{
         escrevecomandos();
         printf("\n\t\tcomando:");
-        scanf(" %28[^\n]", &cmd);
+        scanf(" %28[^\n]", cmd);
 
         if(!strcmp(cmd, "ver paragens")){
             pritparagens(PGEM, tamPGEM);
@@ -114,6 +208,11 @@ int main() {
         }else
             if(!strcmp(cmd, "localizar")){
                 localizar_paragem(PGEM, tamPGEM, listalinhas);
+        }else
+            if(!strcmp(cmd, "inserir linha")){
+                printf("putas");
+                listalinhas = inserir_linha(listalinhas, PGEM, tamPGEM);
+
         }else
             printf("\n\t\t\t--->comando nao existe\n");
 
@@ -187,15 +286,14 @@ int recuperaDadosDeParagens(paragem** Pgem, int *total, Plinhas* p){
 }
 
 PLinhaParagem insere_paragemnNaLinha_final(PLinhaParagem p, PLinhaParagem novo){
-    Plinhas aux;
+    PLinhaParagem aux;
     if(p == NULL)
         p = novo;
-    else
-    {
-        aux =  p;
-        while(aux->Prolinha != NULL)
-            aux = aux->Prolinha;
-        aux->Prolinha = novo;
+    else{
+        aux = p;
+        while(aux->Prox != NULL)
+            aux = aux->Prox;
+        aux->Prox = novo;
         novo->ant = aux;
     }
     return p;
@@ -275,7 +373,7 @@ void eliminarNoDaLinha(Plinhas p, paragem *Pgem, int num){
 
     int i;
     char nomeDaLinha[tamNome], codigo[tamCodigo + 1];
-    printf("\nescreva o nome da linha, que a paragem que vocÃª quer eliminar pertence: ");
+    printf("\nescreva o nome da linha, que a paragem que você quer eliminar pertence: ");
     scanf(" %29[^\n]", nomeDaLinha);
 
     while (p != NULL && strcmp(p->Nome, nomeDaLinha) != 0)
@@ -456,7 +554,7 @@ void localizar_paragem(paragem* Pgem, int numparagem, Plinhas p){
 void geracodigo(char p[], paragem* PGEM, int tam){
     int i;
 
-    // Inicializa o gerador de nÃºmeros aleatÃ³rios com o tempo atual;
+    // Inicializa o gerador de números aleatórios com o tempo atual;
     srand((unsigned int)time(NULL));
     do{
         printf("\nvou criar uum codigo");
@@ -611,6 +709,7 @@ void ListarLinhas(Plinhas p){
         aux = p->InicioParagem;
         while (aux != NULL){
             printf("\n\t-->nome: %s //codigo: %s ", aux->nome, aux->codigo);
+            printf("\n\t-->ant: %p //depois: %p // numparagem = %i ", aux->ant, aux->Prox, p->numDePagagens); //teste;;
             aux = aux->Prox;
         }
         p = p->Prolinha;
@@ -618,15 +717,16 @@ void ListarLinhas(Plinhas p){
 }
 
 void escrevecomandos(){
-    printf("\n\t comando: \"adicionar paragem\"         - para adicionar uma paragem.");
-    printf("\n\t comando: \"eliminar paragem\"          - para apagar uma paragem.");
-    printf("\n\t comando: \"ver paragens\"              - para ver todas as paragens.");
-    printf("\n\t comando: \"adicionar linha\"           - para adicionar uma linha");
-    printf("\n\t comando: \"eliminar linha\"            - para apagar uma linha");
-    printf("\n\t comando: \"ver linhas\"                - para ver todas as linhas");
-    printf("\n\t comando: \"adicionar no a linha\"      - para ver todas as linhas");
-    printf("\n\t comando: \"eliminar no a linha\"       - para ver todas as linhas");
-    printf("\n\t comando: \"localizar\"                 - para ver todas as linhas");
-    printf("\n\t comando: \"sair\"                      - para terminar.");
+    printf("\n\t comando: \"adicionar paragem\"      - para adicionar uma paragem.");
+    printf("\n\t comando: \"eliminar paragem\"       - para apagar uma paragem.");
+    printf("\n\t comando: \"ver paragens\"           - para ver todas as paragens.");
+    printf("\n\t comando: \"adicionar linha\"        - para adicionar uma linha");
+    printf("\n\t comando: \"eliminar linha\"         - para apagar uma linha");
+    printf("\n\t comando: \"ver linhas\"             - para ver todas as linhas");
+    printf("\n\t comando: \"adicionar no a linha\"   - para ver todas as linhas");
+    printf("\n\t comando: \"eliminar no a linha\"    - para ver todas as linhas");
+    printf("\n\t comando: \"localizar\"              - para ver todas as linhas");
+    printf("\n\t comando: \"inserir linha\"          - para inserir uma linha completa tem que ter um ficheiro como a informacao");
+    printf("\n\t comando: \"sair\"                   - para terminar.");
     putchar('\n');
 }
