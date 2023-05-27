@@ -52,33 +52,60 @@ Plinhas insere_linha_final(Plinhas p, Plinhas novo);
 PLinhaParagem insere_paragemnNaLinha_final(PLinhaParagem p, PLinhaParagem novo);
 Plinhas inserir_linha(Plinhas L, paragem* p,  int NumParagens);
 void calcularpercurso(Plinhas L, paragem* P,  int NumParagens);
-int funcaoCalculaUmLinha(PLinhaParagem P, char origem[tamCodigo+1], char destinio[tamCodigo+1], PLinhaParagem* Ppercurso, int* num);
+int funcaoCalculaUmLinha(PLinhaParagem P, char destinio[tamCodigo+1], PLinhaParagem* Ppercurso, int* num);
 
-int funcaoCalculaUmLinha(PLinhaParagem P, char origem[tamCodigo+1], char destinio[tamCodigo+1], PLinhaParagem* Ppercurso, int* num){
-    printf("destino %s", destinio);
+int funcaoCalculaUmLinha(PLinhaParagem P, char destinio[tamCodigo+1], PLinhaParagem* Ppercurso, int* num){
     *num = 0;
     PLinhaParagem AUXP = P, aux = NULL;
     while(AUXP != NULL){
+
         if((aux = realloc(*Ppercurso, sizeof (linhaparagem)*(*num+1))) == NULL){
             printf("Erro na realocacao de memoria");
+            return 3;
         }
+        *Ppercurso = aux;
+        (*num)++;
+        strcpy((*Ppercurso)[(*num)-1].nome, AUXP->nome);
+        strcpy((*Ppercurso)[(*num)-1].codigo, AUXP->codigo);
+        (*Ppercurso)[(*num)-1].ant = NULL; (*Ppercurso)[(*num)-1].ant = NULL;
 
-        printf("\n\t\t\t-->---> %s", AUXP->nome);
+        //printf("\n\t\t\t-->---> %s", AUXP->nome);
         if(!strcmp(AUXP->codigo, destinio)){
-            printf("\n\t\t VOLTAR PARA A FUNCAO \n\n");
+        //    printf("\n\t\t VOLTAR PARA A FUNCAO \n\n");
             return 1;
         }
         AUXP = AUXP->Prox;
     }
+
+    free(*Ppercurso);
+    *Ppercurso = NULL;
     AUXP = P;
+    *num = 0;
+
     while(AUXP != NULL){
-        printf("\n\t\t\t-->---> %s", AUXP->nome);
+
+        if((aux = realloc(*Ppercurso, sizeof (linhaparagem)*(*num+1))) == NULL){
+            printf("Erro na realocacao de memoria");
+            return 3;
+        }
+        *Ppercurso = aux;
+        (*num)++;
+        strcpy((*Ppercurso)[(*num)-1].nome, AUXP->nome);
+        strcpy((*Ppercurso)[(*num)-1].codigo, AUXP->codigo);
+        (*Ppercurso)[(*num)-1].ant = NULL; (*Ppercurso)[(*num)-1].ant = NULL;
+
+        //printf("\n\t\t\t-->---> %s", AUXP->nome);
         if(!strcmp(AUXP->codigo, destinio)){
-            printf("\n\t\t VOLTAR PARA A FUNCAO \n\n");
+        //    printf("\n\t\t VOLTAR PARA A FUNCAO \n\n");
             return 1;
         }
         AUXP = AUXP->ant;
     }
+
+    free(*Ppercurso);
+    *Ppercurso = NULL;
+    *num = 0;
+
     return 0;
 }
 
@@ -94,27 +121,30 @@ void calcularpercurso(Plinhas L, paragem* P,  int NumParagens){
     scanf(" %29[^\n]", origem);
     printf("inserir o codigo da paragem de destino: ");
     scanf(" %29[^\n]", destino);
+    putchar('\n');
+
 
     for(O = 0; O < NumParagens && strcmp(origem, P[O].codigo) != 0; O++)
         ;
     for(D = 0; D < NumParagens && strcmp(destino, P[D].codigo) != 0; D++)
         ;
-    if(D == NumParagens || O == NumParagens || P[D].numLinhas == 0 || P[O].numLinhas == 0){
+    if(D == NumParagens || O == NumParagens || P[D].numLinhas == 0 || P[O].numLinhas == 0 || strcmp(P[O].codigo, P[D].codigo) == 0){
         printf("\nErro a inserir as paragens de destino e de origem tente de novo");
         return ;
     }
 
-    printf(" vou para o lop");
+
+    //printf(" vou para o lop");
     int sair_while_externo = 0, encontrei = 0;
-
     //carcolar em uma linha sem mudansas de linha
-    for (int i = 0; i < P[O].numLinhas && !encontrei  ; ++i) {
 
+    for (int i = 0; i < P[O].numLinhas && !encontrei  ; ++i) {
+        arryDeParagens = NULL;
         while (lnova != NULL && !sair_while_externo){
-            printf("\n%s numero de paragens = %i", lnova->Nome, lnova->numDePagagens);
+            //printf("\n%s numero de paragens = %i", lnova->Nome, lnova->numDePagagens);
             aux = lnova->InicioParagem;
-            while (aux != NULL && !sair_while_externo){
-                printf("\n\t-->nome: %s //codigo: %s ", aux->nome, aux->codigo);
+            while (aux != NULL){
+            //    printf("\n\t-->nome: %s //codigo: %s ", aux->nome, aux->codigo);
                 if (!strcmp(P[O].codigo, aux->codigo))
                 {
                     sair_while_externo = 1; // Sai do laço while externo
@@ -123,17 +153,30 @@ void calcularpercurso(Plinhas L, paragem* P,  int NumParagens){
                 aux = aux->Prox;
             }
             auxlinha = lnova;
-            lnova = lnova->Prolinha->Prolinha;
+            lnova = lnova->Prolinha;
         }
+
         lnova = auxlinha;
-        printf("\n\t\t\tteste ___ nome da linha #%s# nome paragens p.codigo = %s 66 %s", lnova->Nome, aux->codigo, P[O].codigo);
-        encontrei = funcaoCalculaUmLinha(aux, P[O].codigo, P[D].codigo, &arryDeParagens, &numorigem_destino);
-        printf("\n-------------------------------\n");
+        //printf("\n\t\t\tteste ___ nome da linha #%s# nome paragens p.codigo = %s 66 %s", lnova->Nome, aux->codigo, P[O].codigo);
+        encontrei = funcaoCalculaUmLinha(aux, P[D].codigo, &arryDeParagens, &numorigem_destino);
+        if(encontrei == 3){
+            return ;
+        }
+        //printf("\n----------%i---------------------\n", encontrei);
         sair_while_externo = 0;
         lnova = lnova->Prolinha;
     }
 
+    if (encontrei){
+        printf("paragens da paragem %s # %s ate a paragens %s # %s sem mudanca de linha",  P[O].nome, P[O].codigo, P[D].nome,  P[D].codigo);
+        for (int i = 0; i < numorigem_destino; ++i) {
+            printf("\nparagens %s # %s", arryDeParagens[i].nome, arryDeParagens[i].codigo);
+        }
+        putchar('\n');
+    }
 
+    free(arryDeParagens);
+    arryDeParagens = NULL;
 }
 
 int main() {
