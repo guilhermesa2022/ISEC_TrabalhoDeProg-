@@ -1,0 +1,3 @@
+C:/Users/35193/OneDrive - ISEC/Ambiente de Trabalho/PROG/PTHF2023/cmake-build-debug/CMakeFiles/PTHF2023.dir
+C:/Users/35193/OneDrive - ISEC/Ambiente de Trabalho/PROG/PTHF2023/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/35193/OneDrive - ISEC/Ambiente de Trabalho/PROG/PTHF2023/cmake-build-debug/CMakeFiles/rebuild_cache.dir
